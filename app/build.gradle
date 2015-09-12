@@ -23,4 +23,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'com.google.zxing:core:3.2.1'
+    compile 'pl.tajchert:waitingdots:0.2.0'
+    compile 'de.greenrobot:eventbus:2.4.0'
 }

@@ -6,5 +6,9 @@
     <string name="title_activity_upload_result">UploadResult</string>
     <string name="hello_world">Hello world!</string>
     <string name="scan_button_text">扫一下楼妹就跳出来</string>
-    <string name="scan_cam_text">对准菊花扫</string>
+    <string name="scan_cam_text">请对准楼妹的菊花扫</string>
+    <string name="item_code">物品编码</string>
+    <string name="item_weight_label">物品重量(KG)</string>
+    <string name="submit">提交</string>
+    <string name="loading_text">正在提交至Lousysterm</string>
 </resources>

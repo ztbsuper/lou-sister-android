@@ -1,6 +1,7 @@
 package ztbsuper.lousysterm.activities;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 import ztbsuper.lousysterm.R;
+import ztbsuper.lousysterm.enums.ExtraParamKeys;
 import ztbsuper.lousysterm.zxing.ScanableActivity;
 import ztbsuper.lousysterm.zxing.camera.CameraManager;
 import ztbsuper.lousysterm.zxing.camera.CaptureActivityHandler;
@@ -97,11 +99,15 @@ public class CaptureActivity extends ScanableActivity implements SurfaceHolder.C
     @Override
     public void handleDecode(Result result, Bitmap barcode) {
         info("find result:" + result.getText());
+        Intent intent = new Intent(this, UploadResult.class);
+        intent.putExtra(ExtraParamKeys.ITEM_CODE.toString(), result.getText());
+        startActivity(intent);
+        this.finish();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        info("create surface");≠
+        info("create surface");
         if (!hasSurface) {
             hasSurface = true;
             initCamera(holder);
