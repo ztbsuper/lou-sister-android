@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Lousysterm</string>
+    <string name="title_activity_main">楼妹吉祥</string>
+
+    <string name="action_settings">设置</string>
+    <string name="title_activity_upload_result">UploadResult</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="scan_button_text">扫一下楼妹就跳出来</string>
+    <string name="scan_cam_text">对准菊花扫</string>
+</resources>
