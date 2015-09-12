@@ -1,25 +1,40 @@
 package ztbsuper.lousysterm.activities;
 
-import android.app.Activity;
+import android.app.ProgressDialog;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
 import java.io.IOException;
+import java.util.Vector;
 
 import ztbsuper.lousysterm.R;
-import ztbsuper.lousysterm.zxing.Scanable;
+import ztbsuper.lousysterm.zxing.ScanableActivity;
 import ztbsuper.lousysterm.zxing.camera.CameraManager;
+import ztbsuper.lousysterm.zxing.camera.CaptureActivityHandler;
+import ztbsuper.lousysterm.zxing.decoding.InactivityTimer;
+import ztbsuper.lousysterm.zxing.view.ViewfinderView;
 
+import static ztbsuper.lousysterm.util.LogUtils.debug;
 import static ztbsuper.lousysterm.util.LogUtils.info;
 
 /**
  * Created by tbzhang on 9/11/15.
  */
-public class CaptureActivity extends Activity implements Scanable, SurfaceHolder.Callback {
+public class CaptureActivity extends ScanableActivity implements SurfaceHolder.Callback {
     private boolean hasSurface = false;
+    private ViewfinderView viewfinderView = null;
+    private CaptureActivityHandler captureActivityHandler = null;
+    private Vector<BarcodeFormat> decodeFormats = null;
+    private String characterSet = null;
+    private ProgressDialog progressDialog = null;
+    private InactivityTimer inactivityTimer = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +42,9 @@ public class CaptureActivity extends Activity implements Scanable, SurfaceHolder
         setContentView(R.layout.activity_capture);
         info("init " + getClass().getName());
         CameraManager.init(getApplicationContext());
+        progressDialog = new ProgressDialog(CaptureActivity.this);
+        inactivityTimer = new InactivityTimer(this);
+        viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
     }
 
     @Override
@@ -34,9 +52,11 @@ public class CaptureActivity extends Activity implements Scanable, SurfaceHolder
         super.onResume();
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
-        if (!hasSurface)
+        debug("has surface? " + hasSurface);
+        if (hasSurface)
             initCamera(surfaceHolder);
         else {
+            surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
             surfaceHolder.addCallback(this);
         }
 
@@ -44,22 +64,44 @@ public class CaptureActivity extends Activity implements Scanable, SurfaceHolder
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (captureActivityHandler != null) {
+            captureActivityHandler.quitSynchronously();
+            captureActivityHandler = null;
+        }
+        CameraManager.get().closeDriver();
+    }
+
+    @Override
     public void handleResult(Result rawResult, Bundle bundle) {
 
     }
 
-    private void initCamera(SurfaceHolder surfaceHolder) {
-        try {
-            CameraManager.get().openDriver(surfaceHolder);
-        } catch (IOException ioe) {
-            return;
-        } catch (RuntimeException e) {
-            return;
-        }
+    @Override
+    public Handler getHandler() {
+        return captureActivityHandler;
+    }
+
+    @Override
+    public void drawViewfinder() {
+        viewfinderView.drawViewfinder();
+    }
+
+    @Override
+    public ViewfinderView getViewfinderView() {
+        return viewfinderView;
+    }
+
+
+    @Override
+    public void handleDecode(Result result, Bitmap barcode) {
+        info(result.getText());
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        info("create surface");
         if (!hasSurface) {
             hasSurface = true;
             initCamera(holder);
@@ -73,6 +115,19 @@ public class CaptureActivity extends Activity implements Scanable, SurfaceHolder
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-
+        hasSurface = false;
     }
+
+    private void initCamera(SurfaceHolder surfaceHolder) {
+        try {
+            info("open camera");
+            CameraManager.get().openDriver(surfaceHolder);
+        } catch (IOException | RuntimeException ioe) {
+            return;
+        }
+        if (null == captureActivityHandler)
+            captureActivityHandler = new CaptureActivityHandler(this, decodeFormats, characterSet);
+    }
+
+
 }

@@ -6,14 +6,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.View;
 
-import com.google.zxing.Result;
-
 import ztbsuper.lousysterm.R;
-import ztbsuper.lousysterm.zxing.Scanable;
 
 import static ztbsuper.lousysterm.util.LogUtils.info;
 
-public class MainActivity extends ActionBarActivity implements Scanable {
+public class MainActivity extends ActionBarActivity {
 
 
     @Override
@@ -42,8 +39,5 @@ public class MainActivity extends ActionBarActivity implements Scanable {
         super.onPostResume();
     }
 
-    @Override
-    public void handleResult(Result rawResult, Bundle bundle) {
-        System.out.println(rawResult.getText());
-    }
+
 }
