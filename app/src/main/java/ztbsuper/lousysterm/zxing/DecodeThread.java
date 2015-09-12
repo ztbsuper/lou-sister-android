@@ -12,6 +12,7 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
 import ztbsuper.lousysterm.zxing.decoding.DecodeFormatManager;
+import ztbsuper.lousysterm.zxing.decoding.DecodeHandler;
 
 /**
  * Created by tbzhang on 9/10/15.
@@ -62,7 +63,7 @@ public class DecodeThread extends Thread {
     @Override
     public void run() {
         Looper.prepare();
-//        handler = new DecodeHandler(activity, hints);
+        handler = new DecodeHandler(activity, hints);
         handlerInitLatch.countDown();
         Looper.loop();
     }

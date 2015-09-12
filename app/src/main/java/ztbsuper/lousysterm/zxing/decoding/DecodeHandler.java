@@ -36,7 +36,7 @@ import ztbsuper.lousysterm.zxing.ScanableActivity;
 import ztbsuper.lousysterm.zxing.camera.CameraManager;
 import ztbsuper.lousysterm.zxing.camera.PlanarYUVLuminanceSource;
 
-final class DecodeHandler extends Handler {
+public final class DecodeHandler extends Handler {
 
     private static final String TAG = DecodeHandler.class.getSimpleName();
 

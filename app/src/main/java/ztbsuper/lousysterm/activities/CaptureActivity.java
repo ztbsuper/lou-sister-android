@@ -96,12 +96,12 @@ public class CaptureActivity extends ScanableActivity implements SurfaceHolder.C
 
     @Override
     public void handleDecode(Result result, Bitmap barcode) {
-        info(result.getText());
+        info("find result:" + result.getText());
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        info("create surface");
+        info("create surface");≠
         if (!hasSurface) {
             hasSurface = true;
             initCamera(holder);
