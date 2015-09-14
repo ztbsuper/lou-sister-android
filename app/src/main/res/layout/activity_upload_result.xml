@@ -41,12 +41,12 @@
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <EditText
-            android:id="@+id/editText"
+            android:id="@+id/item_weight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="numberDecimal"
-            android:text="0.0" />
+            android:text="" />
 
         <Button
             android:id="@+id/submit_btn"

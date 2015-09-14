@@ -1,17 +1,32 @@
 package ztbsuper.lousysterm.activities;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import ztbsuper.lousysterm.R;
 import ztbsuper.lousysterm.enums.ExtraParamKeys;
 
+import static ztbsuper.lousysterm.util.LogUtils.debug;
+import static ztbsuper.lousysterm.util.LogUtils.error;
 import static ztbsuper.lousysterm.util.LogUtils.info;
 
 public class UploadResult extends ActionBarActivity {
@@ -64,6 +79,45 @@ public class UploadResult extends ActionBarActivity {
         info("click submit btn");
         submitBtn.setClickable(false);
         loadingDialog.show();
+        uploadResult();
+    }
+
+    private void uploadResult() {
+        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+
+        Response.Listener<JSONObject> listener = new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                info("get response from server: " + response.toString());
+                loadingDialog.hide();
+                Dialog dialog = popupSuccessDialog();
+                dialog.show();
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
+            }
+        };
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("itemCode", ((TextView) findViewById(R.id.item_code)).getText().toString());
+        map.put("weight", ((TextView) findViewById(R.id.item_weight)).getText().toString());
+
+        JSONObject requestBody = new JSONObject(map);
+        String requestUrl = getString(R.string.server_url) + "storage_record";
+        JsonObjectRequest request = new JsonObjectRequest(requestUrl, requestBody, listener, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                loadingDialog.hide();
+                error("ERROR: " + volleyError.toString());
+            }
+        });
+        debug("request url: " + requestUrl);
+        requestQueue.add(request);
     }
 
     private void setItemCode(String itemCode) {
@@ -72,5 +126,12 @@ public class UploadResult extends ActionBarActivity {
         itemCodeTextView.setText(itemCode);
     }
 
+    private Dialog popupSuccessDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.plain_text_dialog_content);
+        return dialog;
+    }
 
 }
