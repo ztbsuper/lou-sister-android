@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +35,7 @@ public class UploadResult extends ActionBarActivity {
 
     private Button submitBtn = null;
     private Dialog loadingDialog = null;
+    private TextView weightInput = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,28 @@ public class UploadResult extends ActionBarActivity {
 
         submitBtn = (Button) findViewById(R.id.submit_btn);
         loadingDialog = LoadingBuilder.build(this).build();
+        weightInput = (TextView) findViewById(R.id.item_weight);
+        setNonClickable();
+        weightInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (weightInput.getText().toString().length() > 0) {
+                    setClickable();
+                } else {
+                    setNonClickable();
+                }
+            }
+        });
     }
 
     @Override
@@ -77,7 +102,7 @@ public class UploadResult extends ActionBarActivity {
 
     public void onClickSubmit(View self) {
         info("click submit btn");
-        submitBtn.setClickable(false);
+        setNonClickable();
         loadingDialog.show();
         uploadResult();
     }
@@ -112,6 +137,7 @@ public class UploadResult extends ActionBarActivity {
         JsonObjectRequest request = new JsonObjectRequest(requestUrl, requestBody, listener, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
+                setClickable();
                 loadingDialog.hide();
                 error("ERROR: " + volleyError.toString());
             }
@@ -132,6 +158,16 @@ public class UploadResult extends ActionBarActivity {
         dialog.setCancelable(true);
         dialog.setContentView(R.layout.plain_text_dialog_content);
         return dialog;
+    }
+
+    private void setClickable() {
+        submitBtn.setClickable(true);
+        submitBtn.setBackgroundColor(R.color.theme_accent_1_light);
+    }
+
+    private void setNonClickable() {
+        submitBtn.setClickable(false);
+        submitBtn.setBackgroundColor(R.color.dark_divider);
     }
 
 }
