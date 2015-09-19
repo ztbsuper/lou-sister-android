@@ -1,5 +1,6 @@
 package ztbsuper.lousysterm.activities;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,10 +11,10 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -115,13 +116,13 @@ public class UploadResult extends ActionBarActivity {
             public void onResponse(JSONObject response) {
                 info("get response from server: " + response.toString());
                 loadingDialog.hide();
-                Dialog dialog = popupSuccessDialog();
-                dialog.show();
-                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                popupClosableDialog(getString(R.string.submit_success), getString(R.string.submit_success), new DialogInterface.OnClickListener() {
                     @Override
-                    public void onCancel(DialogInterface dialog) {
+                    public void onClick(DialogInterface dialog, int which) {
+//                        UploadResult.this.finish();
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
+                        UploadResult.this.finish();
                     }
                 });
 
@@ -137,12 +138,18 @@ public class UploadResult extends ActionBarActivity {
         JsonObjectRequest request = new JsonObjectRequest(requestUrl, requestBody, listener, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                setClickable();
-                loadingDialog.hide();
+                popupClosableDialog(getString(R.string.submit_faild), volleyError.toString(), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setClickable();
+                        loadingDialog.hide();
+                    }
+                });
                 error("ERROR: " + volleyError.toString());
             }
         });
         debug("request url: " + requestUrl);
+        request.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         requestQueue.add(request);
     }
 
@@ -152,13 +159,6 @@ public class UploadResult extends ActionBarActivity {
         itemCodeTextView.setText(itemCode);
     }
 
-    private Dialog popupSuccessDialog() {
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(true);
-        dialog.setContentView(R.layout.plain_text_dialog_content);
-        return dialog;
-    }
 
     private void setClickable() {
         submitBtn.setClickable(true);
@@ -168,6 +168,14 @@ public class UploadResult extends ActionBarActivity {
     private void setNonClickable() {
         submitBtn.setClickable(false);
         submitBtn.setBackgroundColor(R.color.dark_divider);
+    }
+
+    private void popupClosableDialog(String title, String content, DialogInterface.OnClickListener onClickListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(content);
+        builder.setTitle(title);
+        builder.setPositiveButton(getString(R.string.confirm), onClickListener);
+        builder.create().show();
     }
 
 }

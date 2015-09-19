@@ -1,15 +1,22 @@
 <resources>
-    <string name="app_name">Lousysterm</string>
-    <string name="title_activity_main">楼妹吉祥</string>
+    <string name="app_name">楼总万福</string>
+    <string name="title_activity_main">楼总万福</string>
 
     <string name="action_settings">设置</string>
-    <string name="title_activity_upload_result">UploadResult</string>
+    <string name="title_activity_upload_result">上传</string>
     <string name="hello_world">Hello world!</string>
-    <string name="scan_button_text">按一下楼妹就跳出来</string>
-    <string name="scan_cam_text">请对准楼妹的菊花扫</string>
+    <string name="scan_button_text">点击开始扫描</string>
+    <string name="scan_cam_text">请对准货品的条码</string>
     <string name="item_code">物品编码</string>
     <string name="item_weight_label">物品重量(KG)</string>
     <string name="submit">提交</string>
     <string name="loading_text">正在提交至Lousysterm</string>
     <string name="submit_success">提交成功</string>
+    <string name="submit_faild">提交失败</string>
+    <string name="acknowledge">了解</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="alert_dialog_title">提示</string>
+    <string name="confirm">确定</string>
+    <string name="bluetooth_mac_address">98:d3:31:80:5d:eb</string>
 </resources>
