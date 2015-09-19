@@ -103,8 +103,8 @@ public class UploadResult extends ActionBarActivity {
 
     public void onClickSubmit(View self) {
         info("click submit btn");
-        setNonClickable();
         loadingDialog.show();
+        setNonClickable();
         uploadResult();
     }
 
@@ -115,7 +115,7 @@ public class UploadResult extends ActionBarActivity {
             @Override
             public void onResponse(JSONObject response) {
                 info("get response from server: " + response.toString());
-                loadingDialog.hide();
+                loadingDialog.dismiss();
                 popupClosableDialog(getString(R.string.submit_success), getString(R.string.submit_success), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -142,7 +142,7 @@ public class UploadResult extends ActionBarActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         setClickable();
-                        loadingDialog.hide();
+                        loadingDialog.dismiss();
                     }
                 });
                 error("ERROR: " + volleyError.toString());

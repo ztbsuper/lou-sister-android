@@ -12,7 +12,8 @@ import ztbsuper.lousysterm.R;
 public class LoadingBuilder {
     protected Context context;
 
-    public LoadingBuilder(Context context) {
+
+    private LoadingBuilder(Context context) {
         this.context = context;
     }
 

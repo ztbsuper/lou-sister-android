@@ -30,6 +30,7 @@ public class MainActivity extends ActionBarActivity {
         info("click scan btn");
         Intent intent = new Intent(this, CaptureActivity.class);
         startActivity(intent);
+        MainActivity.this.finish();
     }
 
     @Override
@@ -42,5 +43,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         info("resume " + this.getClass().getName());
         super.onResume();
+
     }
 }
