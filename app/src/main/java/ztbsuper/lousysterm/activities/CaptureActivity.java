@@ -1,6 +1,5 @@
 package ztbsuper.lousysterm.activities;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,8 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.Window;
-import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;

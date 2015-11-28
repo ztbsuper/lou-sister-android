@@ -25,9 +25,15 @@ public class CustomBluetoothService implements BluetoothService {
     private Handler handler;
     private volatile BluetoothDeviceStatus deviceStatus = BluetoothDeviceStatus.DISCONNECT;
     private DeviceConnectedThread deviceConnectedThread;
+    private static CustomBluetoothService instance;
 
+    public static CustomBluetoothService getInstance() {
+        if (null == instance)
+            instance = new CustomBluetoothService();
+        return instance;
+    }
 
-    public CustomBluetoothService() {
+    private CustomBluetoothService() {
         initHandlers();
     }
 
@@ -128,6 +134,11 @@ public class CustomBluetoothService implements BluetoothService {
     public boolean isConnected() {
         return null != bluetoothSocket && bluetoothSocket.isConnected();
 
+    }
+
+    @Override
+    public BluetoothDeviceStatus getStatus() {
+        return deviceStatus;
     }
 
     @Override

@@ -6,13 +6,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
@@ -27,6 +26,9 @@ import java.util.HashMap;
 
 import ztbsuper.lousysterm.R;
 import ztbsuper.lousysterm.enums.ExtraParamKeys;
+import ztbsuper.lousysterm.services.BluetoothService;
+import ztbsuper.lousysterm.services.CustomBluetoothService;
+import ztbsuper.lousysterm.services.DataReceiveListener;
 
 import static ztbsuper.lousysterm.util.LogUtils.debug;
 import static ztbsuper.lousysterm.util.LogUtils.error;
@@ -36,7 +38,8 @@ public class UploadResult extends ActionBarActivity {
 
     private Button submitBtn = null;
     private Dialog loadingDialog = null;
-    private TextView weightInput = null;
+    private TextView weightInput;
+    private BluetoothService bluetoothService = CustomBluetoothService.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,26 +50,47 @@ public class UploadResult extends ActionBarActivity {
         loadingDialog = LoadingBuilder.build(this).build();
         weightInput = (TextView) findViewById(R.id.item_weight);
         setNonClickable();
-        weightInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        final Toast illegalWeightToast = Toast.makeText(getApplicationContext(),
+                R.string.illegal_weight, Toast.LENGTH_SHORT);
+        new Thread(new Runnable() {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                if (weightInput.getText().toString().length() > 0) {
-                    setClickable();
-                } else {
-                    setNonClickable();
-                }
+            public void run() {
+                bluetoothService.setDataReceiveListener(new DataReceiveListener() {
+                    private StringBuilder sb = new StringBuilder();
+
+
+                    @Override
+                    public void onDataReceive(int data) {
+                        switch (data) {
+                            case 0x3D:
+                                if (sb.length() != 0) {
+                                    Double aDouble = Double.valueOf(sb.toString());
+                                    weightInput.setText(String.valueOf(aDouble));
+                                    debug("get weight" + sb.toString());
+                                    sb.delete(0, sb.length());
+                                    submitBtn.setClickable(true);
+                                }
+                                break;
+                            case 0x2D:
+                                debug("get negative weight -" + sb.toString());
+                                sb.delete(0, sb.length());
+                                sb.insert(0, 0);
+                                illegalWeightToast.show();
+                                submitBtn.setClickable(false);
+                                break;
+                            default:
+                                sb.insert(0, (char) data);
+                                break;
+                        }
+
+                    }
+                });
             }
-        });
+        }).start();
+
+
     }
 
     @Override

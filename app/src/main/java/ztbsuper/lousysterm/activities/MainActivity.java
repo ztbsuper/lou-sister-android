@@ -6,29 +6,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
-import app.akexorcist.bluetotohspp.library.BluetoothState;
 import ztbsuper.lousysterm.R;
+import ztbsuper.lousysterm.enums.BluetoothDeviceStatus;
 import ztbsuper.lousysterm.enums.BluetoothEvent;
+import ztbsuper.lousysterm.enums.RequestCode;
 import ztbsuper.lousysterm.services.BluetoothService;
 import ztbsuper.lousysterm.services.CustomBluetoothService;
-import ztbsuper.lousysterm.services.DataReceiveListener;
 import ztbsuper.lousysterm.services.StateChangeListener;
 
-import static ztbsuper.lousysterm.util.LogUtils.debug;
 import static ztbsuper.lousysterm.util.LogUtils.info;
 
 public class MainActivity extends Activity {
     private TextView bluetoothStatusTextView;
-    private TextView bluetoothDebugConsoleTextView;
-    private Button bluetoothDebugButton;
-    private Button resetButton;
-    private BluetoothService bluetoothService = new CustomBluetoothService();
+    private BluetoothService bluetoothService = CustomBluetoothService.getInstance();
 
 
     @Override
@@ -36,20 +28,11 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bluetoothStatusTextView = (TextView) findViewById(R.id.bluetooth_status);
-        bluetoothDebugConsoleTextView = (TextView) findViewById(R.id.bluetooth_response);
-        bluetoothDebugButton = (Button) findViewById(R.id.debug_bluetooth);
-        resetButton = (Button) findViewById(R.id.reset_button);
-
-        resetButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                    }
-                }
+        bluetoothStatusTextView.setText(
+                bluetoothService.getStatus() == BluetoothDeviceStatus.CONNECTED ?
+                        R.string.bluetooth_connected :
+                        R.string.bluetooth_disconnected
         );
-
-
     }
 
     @Override
@@ -65,15 +48,6 @@ public class MainActivity extends Activity {
 
     }
 
-
-    public void onClickBluetoothDebug(View self) throws IOException {
-        info("click debug btn");
-        for (int i = 0; i < 1000; i++) {
-            byte[] array = ByteBuffer.allocate(20).putInt(i).array();
-            info("send bt:" + Integer.toHexString(i));
-        }
-    }
-
     @Override
     protected void onPostResume() {
         info("post resume " + this.getClass().getName());
@@ -82,7 +56,7 @@ public class MainActivity extends Activity {
 
     public void onClickBluetoothConnection(View self) {
         Intent intent = new Intent(MainActivity.this, DiscoveryActivity.class);
-        startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE);
+        startActivityForResult(intent, RequestCode.BLUETOOTH_CONNECTION);
     }
 
     @Override
@@ -94,47 +68,43 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         info("on result");
-        if (resultCode == Activity.RESULT_OK) {
-            BluetoothDevice device = (BluetoothDevice) data.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
-            bluetoothService.connect(device);
-            bluetoothService.setDataReceiveListener(new DataReceiveListener() {
-                @Override
-                public void onDataReceive(int data) {
-                    debug(String.valueOf((char) data));
-                }
-            });
+        if (RequestCode.BLUETOOTH_CONNECTION == requestCode) {
+            if (resultCode == Activity.RESULT_OK) {
+                BluetoothDevice device = (BluetoothDevice) data.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
+                bluetoothService.connect(device);
+                bluetoothService.setStateChangeListener(new StateChangeListener() {
+                    @Override
+                    public void onConnectionStart(BluetoothEvent event) {
+                        bluetoothStatusTextView.setText(R.string.bluetooth_connecting);
+                    }
 
-            bluetoothService.setStateChangeListener(new StateChangeListener() {
-                @Override
-                public void onConnectionStart(BluetoothEvent event) {
+                    @Override
+                    public void onConnected(BluetoothEvent event) {
+                        bluetoothStatusTextView.setText(R.string.bluetooth_connected);
+                    }
 
-                }
+                    @Override
+                    public void onDisconnectionStart(BluetoothEvent event) {
+                        bluetoothStatusTextView.setText(R.string.bluetooth_disconnecting);
+                    }
 
-                @Override
-                public void onConnected(BluetoothEvent event) {
+                    @Override
+                    public void onDisconnected(BluetoothEvent event) {
+                        bluetoothStatusTextView.setText(R.string.bluetooth_disconnected);
+                    }
 
-                }
+                    @Override
+                    public void onDisconnectionFailed(BluetoothEvent event) {
+                        bluetoothStatusTextView.setText(R.string.bluetooth_disconnect_failed);
+                    }
 
-                @Override
-                public void onDisconnectionStart(BluetoothEvent event) {
+                    @Override
+                    public void onConnectionFailed(BluetoothEvent event) {
+                        bluetoothStatusTextView.setText(R.string.bluetooth_connect_failed);
+                    }
+                });
 
-                }
-
-                @Override
-                public void onDisconnected(BluetoothEvent event) {
-
-                }
-
-                @Override
-                public void onDisconnectionFailed(BluetoothEvent event) {
-
-                }
-
-                @Override
-                public void onConnectionFailed(BluetoothEvent event) {
-
-                }
-            });
+            }
 
         }
     }

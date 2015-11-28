@@ -9,6 +9,7 @@
     <string name="scan_cam_text">请对准货品的条码</string>
     <string name="item_code">物品编码</string>
     <string name="item_weight_label">物品重量(KG)</string>
+    <string name="illegal_weight">重量获取为负数， 请校正电子秤感应器</string>
     <string name="submit">提交</string>
     <string name="loading_text">正在提交至Lousysterm</string>
     <string name="submit_success">提交成功</string>
@@ -19,16 +20,15 @@
     <string name="alert_dialog_title">提示</string>
     <string name="confirm">确定</string>
     <string name="bluetooth_connect">连接蓝牙</string>
-    <string name="bluetooth_debug">调试蓝牙</string>
-
-    <string name="device_uuid">00001101-0000-1000-8000-00805F9B34FB</string>
 
     <string name="bluetooth_untouchable">没有蓝牙设备</string>
     <string name="bluetooth_disabled">请打开蓝牙设备并连接</string>
     <string name="bluetooth_connected">蓝牙连接成功</string>
     <string name="bluetooth_connecting">蓝牙连接中...</string>
+    <string name="bluetooth_disconnecting">蓝牙断开中...</string>
     <string name="bluetooth_disconnected">蓝牙已断开</string>
     <string name="bluetooth_connect_failed">蓝牙连接失败</string>
+    <string name="bluetooth_disconnect_failed">蓝牙断开失败</string>
 
 
 </resources>
