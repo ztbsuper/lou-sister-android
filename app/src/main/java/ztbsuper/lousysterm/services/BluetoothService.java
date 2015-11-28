@@ -4,11 +4,7 @@ import android.bluetooth.BluetoothDevice;
 
 import java.io.IOException;
 
-public interface BluetoothServiceInterface {
-
-    BluetoothServiceInterface getInstance();
-
-    void setConnectionListener(ConnectionListener listener);
+public interface BluetoothService {
 
     void setDataReceiveListener(DataReceiveListener listener);
 

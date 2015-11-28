@@ -1,5 +1,5 @@
 package ztbsuper.lousysterm.services;
 
 public interface DataReceiveListener {
-    void onDataReceive(String message);
+    void onDataReceive(int data);
 }

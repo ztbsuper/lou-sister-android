@@ -17,12 +17,10 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import ztbsuper.lousysterm.R;
-import ztbsuper.lousysterm.services.WeightService;
 import ztbsuper.lousysterm.util.SamplesUtils;
 
 
@@ -139,14 +137,7 @@ public class DiscoveryActivity extends ListActivity {
         Log.d("EF-BTBee", ">>Click device");
         Intent result = new Intent();
         result.putExtra(BluetoothDevice.EXTRA_DEVICE, _devices.get(position));
-//        WeightService.getInstance().setBluetoothSPP(_devices.get(position), getApplication());
-        try {
-            WeightService.getInstance().setDevice(_devices.get(position));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         setResult(RESULT_OK, result);
-        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 }

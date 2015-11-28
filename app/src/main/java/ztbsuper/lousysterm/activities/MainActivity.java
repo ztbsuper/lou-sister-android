@@ -8,24 +8,27 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
-import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
 import ztbsuper.lousysterm.R;
+import ztbsuper.lousysterm.enums.BluetoothEvent;
+import ztbsuper.lousysterm.services.BluetoothService;
+import ztbsuper.lousysterm.services.CustomBluetoothService;
+import ztbsuper.lousysterm.services.DataReceiveListener;
+import ztbsuper.lousysterm.services.StateChangeListener;
 
+import static ztbsuper.lousysterm.util.LogUtils.debug;
 import static ztbsuper.lousysterm.util.LogUtils.info;
 
 public class MainActivity extends Activity {
     private TextView bluetoothStatusTextView;
     private TextView bluetoothDebugConsoleTextView;
     private Button bluetoothDebugButton;
-    private BluetoothSPP bluetoothSPP;
     private Button resetButton;
+    private BluetoothService bluetoothService = new CustomBluetoothService();
 
 
     @Override
@@ -36,7 +39,6 @@ public class MainActivity extends Activity {
         bluetoothDebugConsoleTextView = (TextView) findViewById(R.id.bluetooth_response);
         bluetoothDebugButton = (Button) findViewById(R.id.debug_bluetooth);
         resetButton = (Button) findViewById(R.id.reset_button);
-        bluetoothSPP = new BluetoothSPP(this);
 
         resetButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -47,59 +49,6 @@ public class MainActivity extends Activity {
                 }
         );
 
-
-        bluetoothSPP.setBluetoothStateListener(new BluetoothSPP.BluetoothStateListener() {
-            @Override
-            public void onServiceStateChanged(int state) {
-                switch (state) {
-                    case BluetoothState.STATE_CONNECTED:
-                        break;
-                    case BluetoothState.STATE_CONNECTING:
-                        break;
-                    case BluetoothState.STATE_LISTEN:
-                        break;
-                    case BluetoothState.STATE_NONE:
-                        break;
-                }
-            }
-        });
-
-        bluetoothSPP.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() {
-            @Override
-            public void onDeviceConnected(String name, String address) {
-                info(getString(R.string.bluetooth_connected));
-                Toast.makeText(getApplicationContext(),
-                        getString(R.string.bluetooth_connected), Toast.LENGTH_SHORT).show();
-                bluetoothStatusTextView.setText(getString(R.string.bluetooth_connected));
-                bluetoothDebugButton.setClickable(true);
-            }
-
-            @Override
-            public void onDeviceDisconnected() {
-                info(getString(R.string.bluetooth_disconnected));
-                Toast.makeText(getApplicationContext(),
-                        getString(R.string.bluetooth_disconnected), Toast.LENGTH_SHORT).show();
-                bluetoothStatusTextView.setText(getString(R.string.bluetooth_disconnected));
-                bluetoothDebugButton.setClickable(false);
-            }
-
-            @Override
-            public void onDeviceConnectionFailed() {
-                info(getString(R.string.bluetooth_connect_failed));
-                Toast.makeText(getApplicationContext(),
-                        getString(R.string.bluetooth_connect_failed), Toast.LENGTH_SHORT).show();
-                bluetoothStatusTextView.setText(getString(R.string.bluetooth_disconnected));
-            }
-        });
-        bluetoothSPP.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
-            @Override
-            public void onDataReceived(byte[] data, String message) {
-                info("receive data");
-                bluetoothDebugConsoleTextView.append(Arrays.toString(data) + "-" + message);
-                Toast.makeText(getApplicationContext(),
-                        Arrays.toString(data) + "-" + message, Toast.LENGTH_LONG).show();
-            }
-        });
 
     }
 
@@ -122,8 +71,6 @@ public class MainActivity extends Activity {
         for (int i = 0; i < 1000; i++) {
             byte[] array = ByteBuffer.allocate(20).putInt(i).array();
             info("send bt:" + Integer.toHexString(i));
-            bluetoothSPP.send(array, true);
-            bluetoothSPP.send(array, false);
         }
     }
 
@@ -146,38 +93,55 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data.hasExtra(BluetoothDevice.EXTRA_DEVICE)) {
-                    Toast.makeText(this, data.getExtras().getString(BluetoothDevice.EXTRA_DEVICE),
-                            Toast.LENGTH_LONG).show();
+        info("on result");
+        if (resultCode == Activity.RESULT_OK) {
+            BluetoothDevice device = (BluetoothDevice) data.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
+            bluetoothService.connect(device);
+            bluetoothService.setDataReceiveListener(new DataReceiveListener() {
+                @Override
+                public void onDataReceive(int data) {
+                    debug(String.valueOf((char) data));
                 }
-                BluetoothDevice device = (BluetoothDevice) data.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
-                bluetoothSPP.connect(data);
-            }
-        } else if (requestCode == BluetoothState.REQUEST_ENABLE_BT) {
-            if (resultCode == Activity.RESULT_OK) {
-                bluetoothSPP.setupService();
-            } else {
-                Toast.makeText(getApplicationContext()
-                        , "Bluetooth was not enabled."
-                        , Toast.LENGTH_SHORT).show();
-                finish();
-            }
+            });
+
+            bluetoothService.setStateChangeListener(new StateChangeListener() {
+                @Override
+                public void onConnectionStart(BluetoothEvent event) {
+
+                }
+
+                @Override
+                public void onConnected(BluetoothEvent event) {
+
+                }
+
+                @Override
+                public void onDisconnectionStart(BluetoothEvent event) {
+
+                }
+
+                @Override
+                public void onDisconnected(BluetoothEvent event) {
+
+                }
+
+                @Override
+                public void onDisconnectionFailed(BluetoothEvent event) {
+
+                }
+
+                @Override
+                public void onConnectionFailed(BluetoothEvent event) {
+
+                }
+            });
+
         }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (!bluetoothSPP.isBluetoothEnabled()) {
-            bluetoothSPP.enable();
-        } else {
-            if (!bluetoothSPP.isServiceAvailable()) {
-                info("start bluetooth spp service");
-                bluetoothSPP.setupService();
-                bluetoothSPP.startService(BluetoothState.DEVICE_OTHER);
-            }
-        }
+
     }
 }

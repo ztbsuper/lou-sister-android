@@ -17,10 +17,8 @@ import ztbsuper.lousysterm.enums.BluetoothEventsSeq;
 
 import static ztbsuper.lousysterm.util.LogUtils.debug;
 
-public class CustomBluetoothService implements BluetoothServiceInterface {
+public class CustomBluetoothService implements BluetoothService {
 
-    private BluetoothServiceInterface instance;
-    private ArrayList<ConnectionListener> connectionListeners = new ArrayList<>();
     private ArrayList<DataReceiveListener> receiveListeners = new ArrayList<>();
     private ArrayList<StateChangeListener> stateChangeListeners = new ArrayList<>();
     private BluetoothSocket bluetoothSocket;
@@ -29,73 +27,70 @@ public class CustomBluetoothService implements BluetoothServiceInterface {
     private DeviceConnectedThread deviceConnectedThread;
 
 
-    private CustomBluetoothService() {
+    public CustomBluetoothService() {
+        initHandlers();
     }
 
-    @Override
-    public BluetoothServiceInterface getInstance() {
-        if (null == instance) {
-            instance = new CustomBluetoothService();
-            handler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    switch (msg.what) {
-                        case BluetoothEventsSeq.CANNOT_CONNECT:
-                            for (StateChangeListener listener : stateChangeListeners) {
-                                listener.onConnectionFailed(BluetoothEvent.CANNOT_CONNECT);
-                            }
-                            break;
-                        case BluetoothEventsSeq.CONNECTING:
-                            for (StateChangeListener listener : stateChangeListeners) {
-                                listener.onConnectionStart(BluetoothEvent.CONNECTING);
-                            }
-                            break;
-                        case BluetoothEventsSeq.CONNECTION_FAILED:
-                            for (StateChangeListener listener : stateChangeListeners) {
-                                listener.onConnectionFailed(BluetoothEvent.CONNECTION_FAILED);
-                            }
-                            break;
-                        case BluetoothEventsSeq.CONNECTION_SUCCESS:
-                            for (StateChangeListener listener : stateChangeListeners) {
-                                listener.onConnected(BluetoothEvent.CONNECTION_SUCCESS);
-                            }
-                            updateStatus(BluetoothDeviceStatus.CONNECTED);
-                            deviceConnectedThread = new DeviceConnectedThread(bluetoothSocket);
-                            new Thread(deviceConnectedThread).start();
-                            break;
-                        case BluetoothEventsSeq.DISCONNECTING:
-                            for (StateChangeListener listener : stateChangeListeners) {
-                                listener.onDisconnectionStart(BluetoothEvent.DISCONNECTING);
-                            }
-                            break;
-                        case BluetoothEventsSeq.DISCONNECTED:
-                            for (StateChangeListener listener : stateChangeListeners) {
-                                listener.onDisconnected(BluetoothEvent.DISCONNECTED);
-                            }
-                            updateStatus(BluetoothDeviceStatus.DISCONNECT);
-                            break;
-                        case BluetoothEventsSeq.DISCONNECTION_FAILED:
-                            for (StateChangeListener listener : stateChangeListeners) {
-                                listener.onDisconnectionFailed(BluetoothEvent.DISCONNECTION_FAILED);
-                            }
-                            break;
-                        case BluetoothEventsSeq.CONNECTION_LOST:
-                            for (StateChangeListener listener : stateChangeListeners) {
-                                listener.onDisconnected(BluetoothEvent.CONNECTION_LOST);
-                            }
-                        default:
-                            break;
-                    }
+
+    private void initHandlers() {
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case BluetoothEventsSeq.CANNOT_CONNECT:
+                        for (StateChangeListener listener : stateChangeListeners) {
+                            listener.onConnectionFailed(BluetoothEvent.CANNOT_CONNECT);
+                        }
+                        break;
+                    case BluetoothEventsSeq.CONNECTING:
+                        for (StateChangeListener listener : stateChangeListeners) {
+                            listener.onConnectionStart(BluetoothEvent.CONNECTING);
+                        }
+                        break;
+                    case BluetoothEventsSeq.CONNECTION_FAILED:
+                        for (StateChangeListener listener : stateChangeListeners) {
+                            listener.onConnectionFailed(BluetoothEvent.CONNECTION_FAILED);
+                        }
+                        break;
+                    case BluetoothEventsSeq.CONNECTION_SUCCESS:
+                        for (StateChangeListener listener : stateChangeListeners) {
+                            listener.onConnected(BluetoothEvent.CONNECTION_SUCCESS);
+                        }
+                        updateStatus(BluetoothDeviceStatus.CONNECTED);
+                        deviceConnectedThread = new DeviceConnectedThread(bluetoothSocket);
+                        new Thread(deviceConnectedThread).start();
+                        break;
+                    case BluetoothEventsSeq.DISCONNECTING:
+                        for (StateChangeListener listener : stateChangeListeners) {
+                            listener.onDisconnectionStart(BluetoothEvent.DISCONNECTING);
+                        }
+                        break;
+                    case BluetoothEventsSeq.DISCONNECTED:
+                        for (StateChangeListener listener : stateChangeListeners) {
+                            listener.onDisconnected(BluetoothEvent.DISCONNECTED);
+                        }
+                        updateStatus(BluetoothDeviceStatus.DISCONNECT);
+                        break;
+                    case BluetoothEventsSeq.DISCONNECTION_FAILED:
+                        for (StateChangeListener listener : stateChangeListeners) {
+                            listener.onDisconnectionFailed(BluetoothEvent.DISCONNECTION_FAILED);
+                        }
+                        break;
+                    case BluetoothEventsSeq.CONNECTION_LOST:
+                        for (StateChangeListener listener : stateChangeListeners) {
+                            listener.onDisconnected(BluetoothEvent.CONNECTION_LOST);
+                        }
+                    case BluetoothEventsSeq.READ_DATA:
+                        for (DataReceiveListener listener : receiveListeners) {
+                            listener.onDataReceive((Integer) msg.obj);
+                        }
+                    default:
+                        break;
                 }
-            };
-        }
-        return instance;
+            }
+        };
     }
 
-    @Override
-    public void setConnectionListener(ConnectionListener listener) {
-        connectionListeners.add(listener);
-    }
 
     @Override
     public void setDataReceiveListener(DataReceiveListener listener) {
@@ -109,6 +104,9 @@ public class CustomBluetoothService implements BluetoothServiceInterface {
 
     @Override
     public synchronized void connect(BluetoothDevice device) {
+        if (null == device) {
+            return;
+        }
         bluetoothSocket = null;
         DeviceConnectionThread deviceConnectionThread = new DeviceConnectionThread(device);
         new Thread(deviceConnectionThread).start();
@@ -196,8 +194,8 @@ public class CustomBluetoothService implements BluetoothServiceInterface {
             }
             while (socket.isConnected()) {
                 try {
-                    int read = inputStream.read();
-                    handler.obtainMessage(BluetoothEventsSeq.READ_DATA, read).sendToTarget();
+                    int data = inputStream.read();
+                    handler.obtainMessage(BluetoothEventsSeq.READ_DATA, data).sendToTarget();
                 } catch (IOException e) {
                     handler.obtainMessage(BluetoothEventsSeq.CONNECTION_LOST);
                     e.printStackTrace();
