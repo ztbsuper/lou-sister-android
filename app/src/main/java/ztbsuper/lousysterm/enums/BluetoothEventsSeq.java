@@ -8,5 +8,7 @@ public class BluetoothEventsSeq {
     public static final int CONNECTION_SUCCESS = 1;
     public static final int DISCONNECTING = 2;
     public static final int DISCONNECTED = 3;
+    public static final int CONNECTION_LOST = 4;
+    public static final int READ_DATA = 5;
 
 }

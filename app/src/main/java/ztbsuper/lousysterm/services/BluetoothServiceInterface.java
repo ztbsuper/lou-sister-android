@@ -2,6 +2,8 @@ package ztbsuper.lousysterm.services;
 
 import android.bluetooth.BluetoothDevice;
 
+import java.io.IOException;
+
 public interface BluetoothServiceInterface {
 
     BluetoothServiceInterface getInstance();
@@ -18,4 +20,5 @@ public interface BluetoothServiceInterface {
 
     boolean isConnected();
 
+    void write(byte[] data) throws IOException;
 }

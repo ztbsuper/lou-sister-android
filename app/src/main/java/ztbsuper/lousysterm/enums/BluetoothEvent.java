@@ -5,5 +5,13 @@ package ztbsuper.lousysterm.enums;
  */
 public enum BluetoothEvent {
 
+    DISCONNECTION_FAILED,
+    CONNECTION_FAILED,
+    CANNOT_CONNECT,
+    CONNECTING,
+    CONNECTION_SUCCESS,
+    DISCONNECTING,
+    DISCONNECTED,
+    CONNECTION_LOST;
 
 }
