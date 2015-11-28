@@ -8,6 +8,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ztbsuper.lousysterm.activities.MainActivity">
 
+
+    <TextView
+        android:id="@+id/bluetooth_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
     <Button
         android:id="@+id/scan_btn"
         android:layout_width="match_parent"
@@ -16,4 +25,40 @@
         android:layout_centerVertical="true"
         android:onClick="onClickScan"
         android:text="@string/scan_button_text" />
+
+    <Button
+        android:id="@+id/connect_bluetooth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="onClickBluetoothConnection"
+        android:text="@string/bluetooth_connect" />
+
+    <Button
+        android:id="@+id/debug_bluetooth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bluetooth_status"
+        android:layout_centerHorizontal="true"
+        android:onClick="onClickBluetoothDebug"
+        android:text="@string/bluetooth_debug" />
+
+    <TextView
+        android:id="@+id/bluetooth_response"
+        android:layout_width="fill_parent"
+        android:layout_height="100dp"
+        android:layout_below="@+id/debug_bluetooth"
+        android:layout_centerHorizontal="true"
+        android:text="DEBUG" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RESET"
+        android:id="@+id/reset_button"
+        android:layout_above="@+id/bluetooth_response"
+        android:layout_toRightOf="@+id/debug_bluetooth"
+        android:layout_toEndOf="@+id/debug_bluetooth" />
+
 </RelativeLayout>
